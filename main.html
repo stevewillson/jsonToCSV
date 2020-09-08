@@ -1,0 +1,56 @@
+<script type="module" >
+    function jsonToCsv(jsonIn) {
+
+        // convert the json object to a CSV format, use '|' as the separator
+        const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+        const header = Object.keys(jsonIn[0])
+        let csv = jsonIn.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join('|'))
+        csv.unshift(header.join('|'))
+        csv = csv.join('\r\n')
+        return csv;
+    }
+
+    function download(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    var input = document.getElementById("file-input");
+    
+    input.onchange = function (jsonInFile) { 
+        
+        // get the file reference
+        var file = jsonInFile.target.files[0]; 
+
+        // set up the reader
+        var reader = new FileReader();
+  
+        // once the file is read, then get the PDF contents 
+        reader.onload = readerEvent => {
+            let lines = readerEvent.target.result;
+            var newArr = JSON.parse(lines); 
+            
+            // output as a CSV file
+            var csvOutput = jsonToCsv(newArr);
+
+                    // output the propertyItemArray as a csv file
+            download("propertyCSV.csv", csvOutput);
+        }
+        reader.readAsText(file);
+    };
+</script>
+
+<html>
+<head>JSON to CSV Parser</head>
+<form>
+    <input id="file-input" type="file" />
+</form>
+</html>
